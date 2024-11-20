@@ -11,5 +11,6 @@
 ## Boceto de la aplicación
 ![image](https://github.com/user-attachments/assets/e53b032c-5bb1-4c76-9f1b-7f5c49f6c7f5)
 
+Paleta de colores de la app: https://paletadecolores.com.mx/paleta/4a5ed0/6575dc/818de8/9ca4f3/b7bbff/
 
 
