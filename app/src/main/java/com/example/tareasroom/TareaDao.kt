@@ -9,10 +9,10 @@ import androidx.room.Update
 
 
 @Dao
-interface TareaDao : List<Tarea> {
+interface TareaDao {
 
     @Insert
-    suspend fun insert(tarea: Tarea)
+    suspend fun insertTarea(tarea: Tarea)
 
     @Update
     suspend fun update(tarea: Tarea)
@@ -20,7 +20,16 @@ interface TareaDao : List<Tarea> {
     @Delete
     suspend fun delete(tarea: Tarea)
 
+    @Insert
+    suspend fun insertTipoTarea(tipoTarea: TipoTarea)
+
     @Transaction
-    @Query("SELECT * FROM Tareas_database")
-    suspend fun getAllTareasAndTipos(): List<Tarea>
+    suspend fun insertTareaConTipo(tarea: Tarea, tipoTarea: TipoTarea) {
+        insertTipoTarea(tipoTarea)  // Primero insertamos el TipoTarea
+        insertTarea(tarea)  // Luego insertamos la Tarea
+    }
+
+
+    @Query("SELECT * FROM Tareas")
+    suspend fun getAllTareasAndTipos(): List<TareasWithTipo>
 }
