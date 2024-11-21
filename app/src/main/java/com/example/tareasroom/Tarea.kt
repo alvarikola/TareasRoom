@@ -9,7 +9,7 @@ import androidx.room.Relation
 
 @Entity(tableName = "Tareas")
 data class Tarea(
-    @PrimaryKey(autoGenerate = true) val idTarea: Int,
+    @PrimaryKey(autoGenerate = true) val idTarea: Int = 0,
     @ColumnInfo(name = "Título") val tituloTarea: String,
     @ColumnInfo(name = "Descripción") val descripcionTarea: String?,
     val idTipoTareaOwner: Int
@@ -17,15 +17,15 @@ data class Tarea(
 
 @Entity(tableName = "TiposTareas")
 data class TipoTarea(
-    @PrimaryKey val idTipoTarea: Int,
+    @PrimaryKey(autoGenerate = true) val idTipoTarea: Int = 0,
     val tituloTipoTarea: String
 )
 
 data class TareasWithTipo(
     @Embedded val tarea: Tarea,
     @Relation(
-        parentColumn = "idTipoTarea",
-        entityColumn = "idTipoTareaOwner"
+        parentColumn = "idTipoTareaOwner",
+        entityColumn = "idTipoTarea"
     )
     val tiposTareas: List<TipoTarea>
 )
