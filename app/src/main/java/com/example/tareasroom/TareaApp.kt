@@ -27,12 +27,17 @@ fun TareaApp(database: AppDatabase) {
     val taskDao = database.tareaDao()
     val scope = rememberCoroutineScope()
 
-    var tareas by remember { mutableStateOf(listOf<Tarea>()) }
+    var tareasWithTipo by remember { mutableStateOf(listOf<TareasWithTipo>()) }
+    var tipos by remember { mutableStateOf(listOf<TipoTarea>()) }
+
     var newTareaName by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf("") }
+    var newTituloTipo by remember { mutableStateOf("") }
+
 
     // Cargar tareas al iniciar
     LaunchedEffect(Unit) {
-        tareas = taskDao.getAllTareasAndTipos()
+        tareasWithTipo = taskDao.getAllTareasAndTipos()
     }
 
     Column(
@@ -46,27 +51,48 @@ fun TareaApp(database: AppDatabase) {
         OutlinedTextField(
             value = newTareaName,
             onValueChange = { newTareaName = it },
-            label = { Text("New Task") },
+            label = { Text("Nueva Tarea") },
             modifier = Modifier.fillMaxWidth()
         )
-
+        OutlinedTextField(
+            value = newDescription,
+            onValueChange = { newDescription = it },
+            label = { Text("Descripción") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = newTituloTipo,
+            onValueChange = { newTituloTipo = it },
+            label = { Text("Tipo") },
+            modifier = Modifier.fillMaxWidth()
+        )
         // Botón para agregar tarea
-        Button(
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    val newTask = Tarea(tituloTarea = newTareaName)
-                    taskDao.insert(newTask)
-                    tasks = taskDao.getAllTasks() // Actualizar la lista
-                    newTaskName = "" // Limpiar el campo
+        tipos.forEach { tipo ->
+            Button(
+                onClick = {
+                    var tituloTipo = tipo.idTipoTarea
+
+                    scope.launch(Dispatchers.IO) {
+                        val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
+                        taskDao.insertTipoTarea(newTipo)
+
+                        val newTask = Tarea(tituloTarea = newTareaName, descripcionTarea = "Tarea de mates", idTipoTareaOwner = tituloTipo)
+                        taskDao.insertTarea(newTask)
+
+                        tareasWithTipo = taskDao.getAllTareasAndTipos() // Actualizar la lista
+                        newTareaName = "" // Limpiar el campo
+                        newDescription = ""
+                        newTituloTipo = ""
+                    }
                 }
+            ) {
+                Text("Añadir tarea")
             }
-        ) {
-            Text("Add Task")
         }
 
         // Mostrar lista de tareas
-        tasks.forEach { task ->
-            Text(text = task.name)
+        tareasWithTipo.forEach { tareaWithTipo ->
+            Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea} ${tareaWithTipo.tarea.idTipoTareaOwner}")
         }
     }
 }
