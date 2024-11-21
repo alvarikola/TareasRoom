@@ -1,5 +1,6 @@
 package com.example.tareasroom
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,10 +67,12 @@ fun TareaApp(database: AppDatabase) {
             label = { Text("Tipo") },
             modifier = Modifier.fillMaxWidth()
         )
+
         // Botón para agregar tarea
-        tipos.forEach { tipo ->
-            Button(
-                onClick = {
+        Button(
+            onClick = {
+                Log.i("prueba", "entro")
+                tipos.forEach {tipo ->
                     var tituloTipo = tipo.idTipoTarea
 
                     scope.launch(Dispatchers.IO) {
@@ -85,9 +88,10 @@ fun TareaApp(database: AppDatabase) {
                         newTituloTipo = ""
                     }
                 }
-            ) {
-                Text("Añadir tarea")
+
             }
+        ) {
+            Text("Añadir tarea")
         }
 
         // Mostrar lista de tareas
