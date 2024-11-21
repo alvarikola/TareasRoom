@@ -14,34 +14,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.tareasroom.ui.theme.TareasRoomTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var database: AppDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            TareasRoomTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+
+        database = AppDatabase.getDatabase(this)
+
+        setContent{
+            TareaApp(database)
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TareasRoomTheme {
-        Greeting("Android")
     }
 }
