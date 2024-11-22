@@ -1,4 +1,4 @@
-package com.example.tareasroom
+package com.example.tareasroom.data
 
 import androidx.room.Embedded
 import androidx.room.Relation
