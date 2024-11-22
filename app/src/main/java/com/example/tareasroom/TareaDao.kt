@@ -30,6 +30,10 @@ interface TareaDao {
     }
 
 
+    @Query("SELECT * FROM TiposTareas")
+    suspend fun getAllTipos(): List<TipoTarea>
+
+
     @Query("SELECT * FROM Tareas")
     suspend fun getAllTareasAndTipos(): List<TareasWithTipo>
 }
