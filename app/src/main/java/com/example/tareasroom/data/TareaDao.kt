@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-
+import com.example.tareasroom.data.TipoTareaDao
 
 @Dao
 interface TareaDao {
@@ -20,18 +20,11 @@ interface TareaDao {
     @Delete
     suspend fun delete(tarea: Tarea)
 
-    @Insert
-    suspend fun insertTipoTarea(tipoTarea: TipoTarea)
-
     @Transaction
     suspend fun insertTareaConTipo(tarea: Tarea, tipoTarea: TipoTarea) {
-        insertTipoTarea(tipoTarea)  // Primero insertamos el TipoTarea
+        TipoTareaDao.insertTipoTarea(tipoTarea)  // Primero insertamos el TipoTarea
         insertTarea(tarea)  // Luego insertamos la Tarea
     }
-
-
-    @Query("SELECT * FROM TiposTareas")
-    suspend fun getAllTipos(): List<TipoTarea>
 
 
     @Query("SELECT * FROM Tareas")
