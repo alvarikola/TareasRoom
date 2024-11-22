@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 @Database(entities = [Tarea::class, TipoTarea::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tareaDao(): TareaDao
+    abstract fun tipoTareaDao(): TipoTareaDao
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
