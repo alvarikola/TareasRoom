@@ -10,8 +10,8 @@ interface TipoTareaDao {
     @Query("SELECT * FROM TiposTareas")
     suspend fun getAllTipos(): List<TipoTarea>
 
-    companion object {
-        @Insert
-        fun insertTipoTarea(tipoTarea: TipoTarea) {}
-    }
+
+    @Insert
+    suspend fun insertTipoTarea(tipoTarea: TipoTarea) {}
+
 }
