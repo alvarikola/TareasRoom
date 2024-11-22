@@ -14,18 +14,3 @@ data class Tarea(
     @ColumnInfo(name = "Descripción") val descripcionTarea: String?,
     val idTipoTareaOwner: Int
 )
-
-@Entity(tableName = "TiposTareas")
-data class TipoTarea(
-    @PrimaryKey(autoGenerate = true) val idTipoTarea: Int = 0,
-    val tituloTipoTarea: String
-)
-
-data class TareasWithTipo(
-    @Embedded val tarea: Tarea,
-    @Relation(
-        parentColumn = "idTipoTareaOwner",
-        entityColumn = "idTipoTarea"
-    )
-    val tiposTareas: List<TipoTarea>
-)
