@@ -28,11 +28,12 @@ import com.example.tareasroom.data.TareaDao
 import com.example.tareasroom.data.Tarea
 import com.example.tareasroom.data.TareasWithTipo
 import com.example.tareasroom.data.TipoTarea
+import com.example.tareasroom.data.TipoTareaDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun FormularioTipos(dao: TareaDao) {
+fun FormularioTipos(tipoDao: TipoTareaDao) {
     var newTituloTipo by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
@@ -47,7 +48,7 @@ fun FormularioTipos(dao: TareaDao) {
         onClick = {
             scope.launch(Dispatchers.IO) {
                 val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
-                dao.insertTipoTarea(newTipo)
+                tipoDao.insertTipoTarea(newTipo)
                 newTituloTipo = ""
             }
         }
@@ -57,7 +58,7 @@ fun FormularioTipos(dao: TareaDao) {
 }
 
 @Composable
-fun FormularioTareas(dao: TareaDao) {
+fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
     var expandedDesplegable by remember { mutableStateOf(false) }
 
     var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
@@ -70,7 +71,7 @@ fun FormularioTareas(dao: TareaDao) {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        tiposList = dao.getAllTipos()
+        tiposList = tipoDao.getAllTipos()
     }
 
     // Campo de texto para agregar una nueva tarea
@@ -124,7 +125,7 @@ fun FormularioTareas(dao: TareaDao) {
     Button(
         onClick = {
             scope.launch(Dispatchers.IO) {
-                dao.insertTarea(
+                taskDao.insertTarea(
                     Tarea(
                     tituloTarea = newTareaName,
                     descripcionTarea = newDescription,
@@ -159,6 +160,7 @@ fun ListaTareas(dao: TareaDao) {
 @Composable
 fun TareaApp(database: AppDatabase) {
     val taskDao = database.tareaDao()
+    val tipoDao = database.tipoTareaDao()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -166,8 +168,8 @@ fun TareaApp(database: AppDatabase) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FormularioTipos(taskDao)
-        FormularioTareas(taskDao)
+        FormularioTipos(tipoDao)
+        FormularioTareas(taskDao, tipoDao)
         ListaTareas(taskDao)
     }
 }
