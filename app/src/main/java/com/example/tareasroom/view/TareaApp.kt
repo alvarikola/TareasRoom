@@ -2,13 +2,17 @@ package com.example.tareasroom.view
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -27,8 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.tareasroom.data.AppDatabase
 import com.example.tareasroom.data.TareaDao
 import com.example.tareasroom.data.Tarea
@@ -312,14 +319,57 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, onTareaAdded: () 
 fun ListaTareas(dao: TareaDao) {
 
     var tareasWithTipo by remember { mutableStateOf(listOf<TareasWithTipo>()) }
+    var mostrarDialogoEditar by remember { mutableStateOf(false) }
+    var mostrarDialogoBorrar by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         tareasWithTipo = dao.getAllTareasAndTipos()
     }
 
-    // Mostrar lista de tareas
-    tareasWithTipo.forEach { tareaWithTipo ->
-        Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea} ${tareaWithTipo.tarea.idTipoTareaOwner}")
+    Column (
+        modifier = Modifier
+        .verticalScroll(rememberScrollState())
+    ){
+        // Mostrar lista de tareas
+        tareasWithTipo.forEach { tareaWithTipo ->
+            Row (modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .background(Color(0xFFb7bbff)
+                )
+            ){
+                Column (
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(10.dp)
+                ){
+                    Text(text = "Tarea: ", fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Tipo: ${tareaWithTipo.tarea.idTipoTareaOwner}", fontSize = 20.sp)
+                    Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea}", fontSize = 20.sp)
+                    Text(text = "${tareaWithTipo.tarea.descripcionTarea}", fontSize = 20.sp)
+                }
+                Column (
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f).padding(10.dp)
+                ){
+                    Button(
+                        onClick = {
+                            mostrarDialogoEditar = true
+                        }
+                    ) {
+                        Text(text = "Editar tarea")
+                    }
+                    Button(
+                        onClick = {
+                            mostrarDialogoBorrar = true
+                        }
+                    ) {
+                        Text(text = "Borrar tarea")
+                    }
+                }
+            }
+        }
     }
 
 }
