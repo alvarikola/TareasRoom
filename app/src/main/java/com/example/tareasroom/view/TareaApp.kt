@@ -43,22 +43,46 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
         label = { Text("Tipo") },
         modifier = Modifier.fillMaxWidth()
     )
-
-    Button(
-        onClick = {
-            scope.launch(Dispatchers.IO) {
-                val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
-                tipoDao.insertTipoTarea(newTipo)
-                newTituloTipo = ""
+    Row {
+        Button(
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
+                    tipoDao.insertTipoTarea(newTipo)
+                    newTituloTipo = ""
+                }
             }
+        ) {
+            Text(text = "Añadir tipo")
         }
-    ) {
-        Text(text = "Añadir tipo")
+        Button(
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
+                    tipoDao.insertTipoTarea(newTipo)
+                    newTituloTipo = ""
+                }
+            }
+        ) {
+            Text(text = "Editar tipo")
+        }
+        Button(
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
+                    tipoDao.insertTipoTarea(newTipo)
+                    newTituloTipo = ""
+                }
+            }
+        ) {
+            Text(text = "Borrar tipo")
+        }
     }
+
 }
 
 @Composable
-fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
+fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, onTareaAdded: () -> Unit) {
     var expandedDesplegable by remember { mutableStateOf(false) }
 
     var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
@@ -67,6 +91,7 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
     var newDescription by remember { mutableStateOf("") }
     var newTipoTarea by remember { mutableIntStateOf(0) }
     var tipoSeleccionado by remember { mutableStateOf("-") }
+
 
     val scope = rememberCoroutineScope()
 
@@ -130,12 +155,13 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
                     tituloTarea = newTareaName,
                     descripcionTarea = newDescription,
                     idTipoTareaOwner = newTipoTarea
-                )
+                    )
                 )
 
                 newTareaName = "" // Limpiar el campo
                 newDescription = ""
                 newTipoTarea = 0
+                onTareaAdded()
             }
         }
     ) {
@@ -145,6 +171,7 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
 
 @Composable
 fun ListaTareas(dao: TareaDao) {
+
     var tareasWithTipo by remember { mutableStateOf(listOf<TareasWithTipo>()) }
 
     LaunchedEffect(Unit) {
@@ -155,12 +182,25 @@ fun ListaTareas(dao: TareaDao) {
     tareasWithTipo.forEach { tareaWithTipo ->
         Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea} ${tareaWithTipo.tarea.idTipoTareaOwner}")
     }
+
 }
 
 @Composable
 fun TareaApp(database: AppDatabase) {
     val taskDao = database.tareaDao()
     val tipoDao = database.tipoTareaDao()
+    var tareasPorActualizar by remember { mutableStateOf(true) }
+
+    val onTareaAdded: () -> Unit = {
+        tareasPorActualizar = true
+    }
+
+    if (tareasPorActualizar) {
+        LaunchedEffect(tareasPorActualizar) {
+            tareasPorActualizar = false // Resetear el flag después de actualizar
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -169,7 +209,7 @@ fun TareaApp(database: AppDatabase) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FormularioTipos(tipoDao)
-        FormularioTareas(taskDao, tipoDao)
+        FormularioTareas(taskDao, tipoDao, onTareaAdded)
         ListaTareas(taskDao)
     }
 }
