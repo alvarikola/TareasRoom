@@ -1,11 +1,15 @@
 package com.example.tareasroom.view
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -22,6 +26,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.tareasroom.data.AppDatabase
 import com.example.tareasroom.data.TareaDao
@@ -36,6 +42,20 @@ import kotlinx.coroutines.launch
 fun FormularioTipos(tipoDao: TipoTareaDao) {
     var newTituloTipo by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+
+    var mostrarDialogoEditar by remember { mutableStateOf(false) }
+    var mostrarDialogoBorrar by remember { mutableStateOf(false) }
+
+    var tipoSeleccionado by remember { mutableStateOf("-") }
+    var expandedDesplegable by remember { mutableStateOf(false) }
+    var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
+    var newTipoTarea by remember { mutableIntStateOf(0) }
+
+
+
+    LaunchedEffect(Unit) {
+        tiposList = tipoDao.getAllTipos()
+    }
 
     OutlinedTextField(
         value = newTituloTipo,
@@ -57,25 +77,144 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
         }
         Button(
             onClick = {
-                scope.launch(Dispatchers.IO) {
-                    val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
-                    tipoDao.insertTipoTarea(newTipo)
-                    newTituloTipo = ""
-                }
+                mostrarDialogoEditar = true
             }
         ) {
             Text(text = "Editar tipo")
         }
+        if (mostrarDialogoEditar) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoEditar = false },
+                title = { Text(text = "Editar") },
+                text = {
+                    Column (
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = newTituloTipo,
+                            onValueChange = { newTituloTipo = it },
+                            label = { Text("Tipo") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = tipoSeleccionado,
+                                onValueChange = { tipoSeleccionado = it },
+                                readOnly = true,
+                                label = { Text("Tipo") },
+                                modifier = Modifier.weight(1f).padding(end = 5.dp)
+                            )
+                            TextButton(
+                                onClick = { expandedDesplegable = true }
+                            ) {
+                                Text("Seleccionar tipo")
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = expandedDesplegable,
+                            onDismissRequest = { expandedDesplegable = false }
+                        ) {
+                            tiposList.forEach { tipo ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(tipo.tituloTipoTarea)
+                                    },
+                                    onClick = {
+                                        newTipoTarea = tipo.idTipoTarea
+                                        tipoSeleccionado = tipo.tituloTipoTarea
+                                        expandedDesplegable = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        scope.launch(Dispatchers.IO) {
+                            val tipoActualizado = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = newTituloTipo)
+                            tipoDao.update(tipoActualizado)
+                            newTituloTipo = ""
+                        }
+                    }) {
+                        Text("Actualizar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { mostrarDialogoEditar = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
         Button(
             onClick = {
-                scope.launch(Dispatchers.IO) {
-                    val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
-                    tipoDao.insertTipoTarea(newTipo)
-                    newTituloTipo = ""
-                }
+                mostrarDialogoBorrar = true
             }
         ) {
             Text(text = "Borrar tipo")
+        }
+        if (mostrarDialogoBorrar) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoBorrar = false },
+                title = { Text(text = "Borrar") },
+                text = {
+                    Column (
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = tipoSeleccionado,
+                                onValueChange = { tipoSeleccionado = it },
+                                readOnly = true,
+                                label = { Text("Tipo") },
+                                modifier = Modifier.weight(1f).padding(end = 5.dp)
+                            )
+                            TextButton(
+                                onClick = { expandedDesplegable = true }
+                            ) {
+                                Text("Seleccionar tipo")
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = expandedDesplegable,
+                            onDismissRequest = { expandedDesplegable = false }
+                        ) {
+                            tiposList.forEach { tipo ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(tipo.tituloTipoTarea)
+                                    },
+                                    onClick = {
+                                        newTipoTarea = tipo.idTipoTarea
+                                        tipoSeleccionado = tipo.tituloTipoTarea
+                                        expandedDesplegable = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        scope.launch(Dispatchers.IO) {
+                            val tipoBorrar = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = tipoSeleccionado)
+                            tipoDao.delete(tipoBorrar)
+                        }
+                    }) {
+                        Text("Borrar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { mostrarDialogoBorrar = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
     }
 
