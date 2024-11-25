@@ -21,11 +21,11 @@ interface TareaDao {
     @Delete
     suspend fun delete(tarea: Tarea)
 
-    @Transaction
-    suspend fun insertTareaConTipo(tarea: Tarea, tipoTarea: TipoTarea) {
-        insertTipoTarea(tipoTarea)  // Primero insertamos el TipoTarea
-        insertTarea(tarea)  // Luego insertamos la Tarea
-    }
+//    @Transaction
+//    suspend fun insertTareaConTipo(tarea: Tarea, tipoTarea: TipoTarea) {
+//        TipoTareaDao.insertTipoTarea(tipoTarea)  // Primero insertamos el TipoTarea
+//        insertTarea(tarea)  // Luego insertamos la Tarea
+//    }
 
     @Query("SELECT * FROM Tareas")
     suspend fun getAllTareasAndTipos(): List<TareasWithTipo>
