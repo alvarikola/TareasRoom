@@ -1,8 +1,10 @@
 package com.example.tareasroom.data
 
+import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 
+@Dao
 interface TipoTareaDao {
 
 
@@ -12,6 +14,6 @@ interface TipoTareaDao {
 
 
     @Insert
-    suspend fun insertTipoTarea(tipoTarea: TipoTarea) {}
+    suspend fun insertTipoTarea(tipoTarea: TipoTarea)
 
 }
