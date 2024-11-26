@@ -333,9 +333,11 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
     var newDescription by remember { mutableStateOf("") }
     var newTipoTarea by remember { mutableIntStateOf(0) }
     var tipoSeleccionado by remember { mutableStateOf("-") }
+    var idTareaSeleccionada by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         tareasWithTipo = dao.getAllTareasAndTipos()
+        tiposList = tipoDao.getAllTipos()
     }
 
     Column (
@@ -345,6 +347,8 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
 
         // Mostrar lista de tareas
         tareasWithTipo.forEach { tareaWithTipo ->
+            Log.i("prueba", "Primer: ${tareaWithTipo.tarea.idTarea}")
+            idTareaSeleccionada = tareaWithTipo.tarea.idTarea
             Row (modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
@@ -368,6 +372,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                     Button(
                         onClick = {
                             mostrarDialogoEditar = true
+                            Log.i("prueba", "Segundo: ${tareaWithTipo.tarea.idTarea}")
                         }
                     ) {
                         Text(text = "Editar tarea")
@@ -375,6 +380,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                     Button(
                         onClick = {
                             scope.launch(Dispatchers.IO) {
+                                Log.i("prueba", "Antes de borrar${tareaWithTipo.tarea.idTarea}")
                                 dao.delete(
                                     Tarea(
                                         idTarea = tareaWithTipo.tarea.idTarea,
@@ -390,82 +396,86 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                     }
                 }
             }
-        }
-        if (mostrarDialogoEditar) {
-            LaunchedEffect(Unit) {
-                tiposList = tipoDao.getAllTipos()
-            }
-            AlertDialog(
-                onDismissRequest = { mostrarDialogoEditar = false },
-                title = { Text(text = "Editar") },
-                text = {
-                    Column (
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Campo de texto para agregar una nueva tarea
-                        OutlinedTextField(
-                            value = newTareaName,
-                            onValueChange = { newTareaName = it },
-                            label = { Text("Editar Tarea") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = newDescription,
-                            onValueChange = { newDescription = it },
-                            label = { Text("Descripción") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedTextField(
-                                value = tipoSeleccionado,
-                                onValueChange = { tipoSeleccionado = it },
-                                readOnly = true,
-                                label = { Text("Tipo") },
-                                modifier = Modifier.weight(1f).padding(end = 5.dp)
-                            )
-                            TextButton(
-                                onClick = { expandedDesplegable = true }
-                            ) {
-                                Text("Seleccionar tipo")
-                            }
-                        }
-                        DropdownMenu(
-                            expanded = expandedDesplegable,
-                            onDismissRequest = { expandedDesplegable = false }
+            if (mostrarDialogoEditar) {
+                AlertDialog(
+                    onDismissRequest = { mostrarDialogoEditar = false },
+                    title = { Text(text = "Editar") },
+                    text = {
+                        Column (
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            tiposList.forEach { tipo ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(tipo.tituloTipoTarea)
-                                    },
-                                    onClick = {
-                                        newTipoTarea = tipo.idTipoTarea
-                                        tipoSeleccionado = tipo.tituloTipoTarea
-                                        expandedDesplegable = false
-                                    }
+                            // Campo de texto para agregar una nueva tarea
+                            OutlinedTextField(
+                                value = newTareaName,
+                                onValueChange = { newTareaName = it },
+                                label = { Text("Editar Tarea") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = newDescription,
+                                onValueChange = { newDescription = it },
+                                label = { Text("Descripción") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                OutlinedTextField(
+                                    value = tipoSeleccionado,
+                                    onValueChange = { tipoSeleccionado = it },
+                                    readOnly = true,
+                                    label = { Text("Tipo") },
+                                    modifier = Modifier.weight(1f).padding(end = 5.dp)
                                 )
+                                TextButton(
+                                    onClick = { expandedDesplegable = true }
+                                ) {
+                                    Text("Seleccionar tipo")
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = expandedDesplegable,
+                                onDismissRequest = { expandedDesplegable = false }
+                            ) {
+                                tiposList.forEach { tipo ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(tipo.tituloTipoTarea)
+                                        },
+                                        onClick = {
+                                            newTipoTarea = tipo.idTipoTarea
+                                            tipoSeleccionado = tipo.tituloTipoTarea
+                                            expandedDesplegable = false
+                                        }
+                                    )
+                                }
                             }
                         }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        scope.launch(Dispatchers.IO) {
-                            val tareaActualizada = Tarea(tituloTarea = newTareaName, descripcionTarea = newDescription, idTipoTareaOwner = newTipoTarea)
-                            dao.update(tareaActualizada)
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            scope.launch(Dispatchers.IO) {
+                                Log.i("prueba", "Antes de editar${idTareaSeleccionada}")
+                                dao.update(
+                                    Tarea(
+                                        idTarea = idTareaSeleccionada,
+                                        tituloTarea = newTareaName,
+                                        descripcionTarea = newDescription,
+                                        idTipoTareaOwner = newTipoTarea)
+                                )
+                                mostrarDialogoEditar = false
+                            }
+                        }) {
+                            Text("Actualizar")
                         }
-                    }) {
-                        Text("Actualizar")
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { mostrarDialogoEditar = false }) {
+                            Text("Cancelar")
+                        }
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = { mostrarDialogoEditar = false }) {
-                        Text("Cancelar")
-                    }
-                }
-            )
+                )
+            }
         }
     }
 
