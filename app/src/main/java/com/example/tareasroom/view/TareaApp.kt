@@ -371,6 +371,10 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                 ){
                     Button(
                         onClick = {
+                            idTareaSeleccionada = tareaWithTipo.tarea.idTarea
+                            newTareaName = tareaWithTipo.tarea.tituloTarea
+                            newDescription = tareaWithTipo.tarea.descripcionTarea
+                            newTipoTarea = tareaWithTipo.tarea.idTipoTareaOwner
                             mostrarDialogoEditar = true
                             Log.i("prueba", "Segundo: ${tareaWithTipo.tarea.idTarea}")
                         }
@@ -461,7 +465,8 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                                         idTarea = idTareaSeleccionada,
                                         tituloTarea = newTareaName,
                                         descripcionTarea = newDescription,
-                                        idTipoTareaOwner = newTipoTarea)
+                                        idTipoTareaOwner = newTipoTarea
+                                    )
                                 )
                                 mostrarDialogoEditar = false
                             }
