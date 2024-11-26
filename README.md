@@ -13,4 +13,7 @@
 
 Paleta de colores de la app: https://paletadecolores.com.mx/paleta/4a5ed0/6575dc/818de8/9ca4f3/b7bbff/
 
+## Aplicación final
+![image](https://github.com/user-attachments/assets/6b47ba37-652f-49b7-90da-9901289107be)
+
 
