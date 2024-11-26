@@ -317,14 +317,22 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
 }
 
 @Composable
-fun ListaTareas(dao: TareaDao) {
+fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
 
     var tareasWithTipo by remember { mutableStateOf(listOf<TareasWithTipo>()) }
     var mostrarDialogoEditar by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
+    var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
 
+
+    var expandedDesplegable by remember { mutableStateOf(false) }
+
+    var newTareaName by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf("") }
+    var newTipoTarea by remember { mutableIntStateOf(0) }
+    var tipoSeleccionado by remember { mutableStateOf("-") }
 
     LaunchedEffect(Unit) {
         tareasWithTipo = dao.getAllTareasAndTipos()
@@ -380,39 +388,84 @@ fun ListaTareas(dao: TareaDao) {
                     ) {
                         Text(text = "Borrar tarea")
                     }
-                    if (mostrarDialogoEditar) {
-                        AlertDialog(
-                            onDismissRequest = { mostrarDialogoEditar = false },
-                            title = { Text(text = "Editar") },
-                            text = {
-                                Column (
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    FormularioTareas() { }
-                                }
-                            },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    scope.launch(Dispatchers.IO) {
-                                        val tipoActualizado = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = newTituloTipo)
-                                        tipoDao.update(tipoActualizado)
-                                        newTituloTipo = ""
-                                        actualizaEstado = true
-                                    }
-                                }) {
-                                    Text("Actualizar")
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { mostrarDialogoEditar = false }) {
-                                    Text("Cancelar")
-                                }
-                            }
-                        )
-                    }
                 }
             }
+        }
+        if (mostrarDialogoEditar) {
+            LaunchedEffect(Unit) {
+                tiposList = tipoDao.getAllTipos()
+            }
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoEditar = false },
+                title = { Text(text = "Editar") },
+                text = {
+                    Column (
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Campo de texto para agregar una nueva tarea
+                        OutlinedTextField(
+                            value = newTareaName,
+                            onValueChange = { newTareaName = it },
+                            label = { Text("Editar Tarea") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = newDescription,
+                            onValueChange = { newDescription = it },
+                            label = { Text("Descripción") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = tipoSeleccionado,
+                                onValueChange = { tipoSeleccionado = it },
+                                readOnly = true,
+                                label = { Text("Tipo") },
+                                modifier = Modifier.weight(1f).padding(end = 5.dp)
+                            )
+                            TextButton(
+                                onClick = { expandedDesplegable = true }
+                            ) {
+                                Text("Seleccionar tipo")
+                            }
+                        }
+                        DropdownMenu(
+                            expanded = expandedDesplegable,
+                            onDismissRequest = { expandedDesplegable = false }
+                        ) {
+                            tiposList.forEach { tipo ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(tipo.tituloTipoTarea)
+                                    },
+                                    onClick = {
+                                        newTipoTarea = tipo.idTipoTarea
+                                        tipoSeleccionado = tipo.tituloTipoTarea
+                                        expandedDesplegable = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        scope.launch(Dispatchers.IO) {
+                            val tareaActualizada = Tarea(tituloTarea = newTareaName, descripcionTarea = newDescription, idTipoTareaOwner = newTipoTarea)
+                            dao.update(tareaActualizada)
+                        }
+                    }) {
+                        Text("Actualizar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { mostrarDialogoEditar = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
     }
 
@@ -423,10 +476,6 @@ fun TareaApp(database: AppDatabase) {
     val taskDao = database.tareaDao()
     val tipoDao = database.tipoTareaDao()
     var tareasPorActualizar by remember { mutableStateOf(true) }
-
-    val onTareaAdded: () -> Unit = {
-        tareasPorActualizar = true
-    }
 
     if (tareasPorActualizar) {
         LaunchedEffect(tareasPorActualizar) {
@@ -443,7 +492,7 @@ fun TareaApp(database: AppDatabase) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FormularioTipos(tipoDao)
-        FormularioTareas(taskDao, tipoDao, onTareaAdded)
-        ListaTareas(taskDao)
+        FormularioTareas(taskDao, tipoDao)
+        ListaTareas(taskDao, tipoDao)
     }
 }
