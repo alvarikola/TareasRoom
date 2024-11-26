@@ -230,7 +230,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
 }
 
 @Composable
-fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, onTareaAdded: () -> Unit) {
+fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao) {
     var expandedDesplegable by remember { mutableStateOf(false) }
 
     var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
@@ -309,7 +309,6 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, onTareaAdded: () 
                 newTareaName = "" // Limpiar el campo
                 newDescription = ""
                 newTipoTarea = 0
-                onTareaAdded()
             }
         }
     ) {
@@ -322,7 +321,9 @@ fun ListaTareas(dao: TareaDao) {
 
     var tareasWithTipo by remember { mutableStateOf(listOf<TareasWithTipo>()) }
     var mostrarDialogoEditar by remember { mutableStateOf(false) }
-    var mostrarDialogoBorrar by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+
 
 
     LaunchedEffect(Unit) {
@@ -333,6 +334,7 @@ fun ListaTareas(dao: TareaDao) {
         modifier = Modifier
         .verticalScroll(rememberScrollState())
     ){
+
         // Mostrar lista de tareas
         tareasWithTipo.forEach { tareaWithTipo ->
             Row (modifier = Modifier
@@ -364,10 +366,50 @@ fun ListaTareas(dao: TareaDao) {
                     }
                     Button(
                         onClick = {
-                            mostrarDialogoBorrar = true
+                            scope.launch(Dispatchers.IO) {
+                                dao.delete(
+                                    Tarea(
+                                        idTarea = tareaWithTipo.tarea.idTarea,
+                                        tituloTarea = tareaWithTipo.tarea.tituloTarea,
+                                        descripcionTarea = tareaWithTipo.tarea.descripcionTarea,
+                                        idTipoTareaOwner = tareaWithTipo.tarea.idTipoTareaOwner
+                                    )
+                                )
+                            }
                         }
                     ) {
                         Text(text = "Borrar tarea")
+                    }
+                    if (mostrarDialogoEditar) {
+                        AlertDialog(
+                            onDismissRequest = { mostrarDialogoEditar = false },
+                            title = { Text(text = "Editar") },
+                            text = {
+                                Column (
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    FormularioTareas() { }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    scope.launch(Dispatchers.IO) {
+                                        val tipoActualizado = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = newTituloTipo)
+                                        tipoDao.update(tipoActualizado)
+                                        newTituloTipo = ""
+                                        actualizaEstado = true
+                                    }
+                                }) {
+                                    Text("Actualizar")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { mostrarDialogoEditar = false }) {
+                                    Text("Cancelar")
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -395,6 +437,7 @@ fun TareaApp(database: AppDatabase) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+//            .background(Color.Red)
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
