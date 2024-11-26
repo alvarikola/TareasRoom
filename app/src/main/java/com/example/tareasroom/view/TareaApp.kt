@@ -59,11 +59,8 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
     var newTipoTarea by remember { mutableIntStateOf(0) }
     var actualizaEstado by remember { mutableStateOf(false) }
 
-    LaunchedEffect(actualizaEstado) {
-        if (actualizaEstado) {
-            tiposList = tipoDao.getAllTipos()
-            actualizaEstado = false
-        }
+    LaunchedEffect(Unit) {
+        tiposList = tipoDao.getAllTipos()
     }
 
     OutlinedTextField(
