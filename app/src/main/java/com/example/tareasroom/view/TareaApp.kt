@@ -330,7 +330,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
     var expandedDesplegable by remember { mutableStateOf(false) }
 
     var newTareaName by remember { mutableStateOf("") }
-    var newDescription by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf<String?>("") }
     var newTipoTarea by remember { mutableIntStateOf(0) }
     var tipoSeleccionado by remember { mutableStateOf("-") }
     var idTareaSeleccionada by remember { mutableIntStateOf(0) }
@@ -363,7 +363,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                     Text(text = "Tarea: ", fontSize = 25.sp, fontWeight = FontWeight.Bold)
                     Text(text = "Tipo: ${tareaWithTipo.tarea.idTipoTareaOwner}", fontSize = 20.sp)
                     Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea}", fontSize = 20.sp)
-                    Text(text = tareaWithTipo.tarea.descripcionTarea, fontSize = 20.sp)
+                    tareaWithTipo.tarea.descripcionTarea?.let { Text(text = it, fontSize = 20.sp) }
                 }
                 Column (
                     verticalArrangement = Arrangement.Center,
@@ -416,12 +416,14 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                                 label = { Text("Editar Tarea") },
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            OutlinedTextField(
-                                value = newDescription,
-                                onValueChange = { newDescription = it },
-                                label = { Text("Descripción") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            newDescription?.let {
+                                OutlinedTextField(
+                                    value = it,
+                                    onValueChange = { newDescription = it },
+                                    label = { Text("Descripción") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
@@ -501,11 +503,13 @@ fun TareaApp(database: AppDatabase) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-//            .background(Color.Red)
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "Gestor de tareas", fontSize = 30.sp, fontWeight = FontWeight.Bold
+        )
         FormularioTipos(tipoDao)
         FormularioTareas(taskDao, tipoDao)
         ListaTareas(taskDao, tipoDao)
