@@ -363,7 +363,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                     Text(text = "Tarea: ", fontSize = 25.sp, fontWeight = FontWeight.Bold)
                     Text(text = "Tipo: ${tareaWithTipo.tarea.idTipoTareaOwner}", fontSize = 20.sp)
                     Text(text = "${tareaWithTipo.tarea.idTarea} ${tareaWithTipo.tarea.tituloTarea}", fontSize = 20.sp)
-                    Text(text = "${tareaWithTipo.tarea.descripcionTarea}", fontSize = 20.sp)
+                    Text(text = tareaWithTipo.tarea.descripcionTarea, fontSize = 20.sp)
                 }
                 Column (
                     verticalArrangement = Arrangement.Center,
