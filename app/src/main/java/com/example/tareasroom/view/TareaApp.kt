@@ -57,11 +57,13 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
     var expandedDesplegable by remember { mutableStateOf(false) }
     var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
     var newTipoTarea by remember { mutableIntStateOf(0) }
+    var actualizaEstado by remember { mutableStateOf(false) }
 
-
-
-    LaunchedEffect(Unit) {
-        tiposList = tipoDao.getAllTipos()
+    LaunchedEffect(actualizaEstado) {
+        if (actualizaEstado) {
+            tiposList = tipoDao.getAllTipos()
+            actualizaEstado = false
+        }
     }
 
     OutlinedTextField(
@@ -77,6 +79,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
                     val newTipo = TipoTarea(tituloTipoTarea = newTituloTipo)
                     tipoDao.insertTipoTarea(newTipo)
                     newTituloTipo = ""
+                    actualizaEstado = true
                 }
             }
         ) {
@@ -144,6 +147,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
                             val tipoActualizado = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = newTituloTipo)
                             tipoDao.update(tipoActualizado)
                             newTituloTipo = ""
+                            actualizaEstado = true
                         }
                     }) {
                         Text("Actualizar")
@@ -211,6 +215,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao) {
                         scope.launch(Dispatchers.IO) {
                             val tipoBorrar = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = tipoSeleccionado)
                             tipoDao.delete(tipoBorrar)
+                            actualizaEstado = true
                         }
                     }) {
                         Text("Borrar")
