@@ -77,6 +77,8 @@ fun FormularioTipos(tipoDao: TipoTareaDao, mostrar: Boolean) {
                         tipoDao.insertTipoTarea(newTipo)
                         newTituloTipo = ""
                         actualizaEstado = true
+                        tiposList = tipoDao.getAllTipos()
+
                     }
                 }
             ) {
@@ -145,6 +147,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao, mostrar: Boolean) {
                                 tipoDao.update(tipoActualizado)
                                 newTituloTipo = ""
                                 actualizaEstado = true
+                                tiposList = tipoDao.getAllTipos()
                             }
                         }) {
                             Text("Actualizar")
@@ -213,6 +216,7 @@ fun FormularioTipos(tipoDao: TipoTareaDao, mostrar: Boolean) {
                                 val tipoBorrar = TipoTarea(idTipoTarea = newTipoTarea, tituloTipoTarea = tipoSeleccionado)
                                 tipoDao.delete(tipoBorrar)
                                 actualizaEstado = true
+                                tiposList = tipoDao.getAllTipos()
                             }
                         }) {
                             Text("Borrar")
@@ -235,6 +239,8 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, mostrar: Boolean)
     var expandedDesplegable by remember { mutableStateOf(false) }
 
     var tiposList by remember { mutableStateOf(listOf<TipoTarea>()) }
+    var tareaList by remember { mutableStateOf(listOf<TareasWithTipo>()) }
+
 
     var newTareaName by remember { mutableStateOf("") }
     var newDescription by remember { mutableStateOf("") }
@@ -246,6 +252,7 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, mostrar: Boolean)
 
     LaunchedEffect(Unit) {
         tiposList = tipoDao.getAllTipos()
+        tareaList = taskDao.getAllTareasAndTipos()
     }
 
     if (mostrar) {
@@ -283,6 +290,9 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, mostrar: Boolean)
             onDismissRequest = { expandedDesplegable = false }
         ) {
             tiposList.forEach { tipo ->
+                scope.launch (Dispatchers.IO){
+                    tiposList = tipoDao.getAllTipos()
+                }
                 DropdownMenuItem(
                     text = {
                         Text(tipo.tituloTipoTarea)
@@ -311,11 +321,13 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, mostrar: Boolean)
                     newTareaName = "" // Limpiar el campo
                     newDescription = ""
                     newTipoTarea = 0
+
                 }
             }
         ) {
             Text("Añadir tarea")
         }
+//        ListaTareas(taskDao, tipoDao)
     }
 
 }
@@ -348,7 +360,16 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
         modifier = Modifier
         .verticalScroll(rememberScrollState())
     ){
-
+        Button(
+            onClick = {
+                scope.launch {
+                    tareasWithTipo = dao.getAllTareasAndTipos()
+                    tiposList = tipoDao.getAllTipos()
+                }
+            }
+        ) {
+            Text("Actualizar")
+        }
         // Mostrar lista de tareas
         if (!mostrarDialogoEditar) {
             tareasWithTipo.forEach { tareaWithTipo ->
@@ -398,6 +419,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                                             idTipoTareaOwner = tareaWithTipo.tarea.idTipoTareaOwner
                                         )
                                     )
+                                    tiposList = tipoDao.getAllTipos()
                                 }
                             }
                         ) {
@@ -451,6 +473,9 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                             onDismissRequest = { expandedDesplegable = false }
                         ) {
                             tiposList.forEach { tipo ->
+                                scope.launch (Dispatchers.IO){
+                                    tiposList = tipoDao.getAllTipos()
+                                }
                                 DropdownMenuItem(
                                     text = {
                                         Text(tipo.tituloTipoTarea)
@@ -477,6 +502,7 @@ fun ListaTareas(dao: TareaDao, tipoDao: TipoTareaDao) {
                                     idTipoTareaOwner = newTipoTarea
                                 )
                             )
+                            tiposList = tipoDao.getAllTipos()
                             mostrarDialogoEditar = false
                         }
                     }) {
