@@ -519,15 +519,17 @@ fun TareaApp(database: AppDatabase) {
         Text(
             text = "Gestor de tareas", fontSize = 30.sp, fontWeight = FontWeight.Bold
         )
-        Button(
-            onClick = { mostrarFormularioTipo = !mostrarFormularioTipo }
-        ) {
-            Text("Formulario para tipos")
-        }
-        Button(
-            onClick = { mostrarFormularioTarea = !mostrarFormularioTarea }
-        ) {
-            Text("Formulario para tareas")
+        Row {
+            Button(
+                onClick = { mostrarFormularioTipo = !mostrarFormularioTipo }
+            ) {
+                Text("Formulario para tipos")
+            }
+            Button(
+                onClick = { mostrarFormularioTarea = !mostrarFormularioTarea }
+            ) {
+                Text("Formulario para tareas")
+            }
         }
         FormularioTipos(tipoDao, mostrarFormularioTipo)
         FormularioTareas(taskDao, tipoDao, mostrarFormularioTarea)
