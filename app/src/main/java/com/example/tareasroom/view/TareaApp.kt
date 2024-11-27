@@ -522,12 +522,12 @@ fun TareaApp(database: AppDatabase) {
         Button(
             onClick = { mostrarFormularioTipo = !mostrarFormularioTipo }
         ) {
-            Text("Formulario Tipo")
+            Text("Formulario para tipos")
         }
         Button(
             onClick = { mostrarFormularioTarea = !mostrarFormularioTarea }
         ) {
-            Text("Formulario Tarea")
+            Text("Formulario para tareas")
         }
         FormularioTipos(tipoDao, mostrarFormularioTipo)
         FormularioTareas(taskDao, tipoDao, mostrarFormularioTarea)
