@@ -327,9 +327,7 @@ fun FormularioTareas(taskDao: TareaDao, tipoDao: TipoTareaDao, mostrar: Boolean)
         ) {
             Text("Añadir tarea")
         }
-//        ListaTareas(taskDao, tipoDao)
     }
-
 }
 
 @Composable
